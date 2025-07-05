@@ -12,7 +12,8 @@ import SwiftData
 struct TopTenVer2App: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            ListItem.self,
+            ListEntry.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

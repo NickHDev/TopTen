@@ -8,54 +8,85 @@
 import SwiftUI
 import SwiftData
 
-struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
-    var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+struct ContentView: View
+{
+  @Environment(\.modelContext) var context
+  
+  @Query var list: [ListItem] = []
+  @State private var newListName: String = ""
+  
+  
+  var body: some View
+  {
+    VStack
+    {
+      Text("Top 10 Lists")
+        .font(.title)
+        .padding(10)
+        .background(Color.teal.opacity(1))
+        .foregroundColor(.black)
+        .cornerRadius(10)
+        .shadow(radius: 6)
+      
+      NavigationStack
+      {
+        List
+        {
+          ForEach(list) { item in
+            NavigationLink(destination: ListDetail(listItem: item)) {
+              Text(item.name)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+          }
+          .onDelete(perform: deleteItems)
+        }
+        .toolbar {
+          ToolbarItem(placement: .automatic)
+            {
+              TextField("Enter New List", text: $newListName)
+                .textFieldStyle(.roundedBorder)
+                .padding(.vertical, 4)
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+          ToolbarItem(placement: .navigationBarTrailing) {
+            EditButton()
+          }
+          ToolbarItem {
+            Button(action: addList) {
+              Label("Add Item", systemImage: "plus")
             }
+          }
         }
+      }
     }
+    
+  }
+  
+  
+  private func addList()
+  {
+    let newList = ListItem(name: newListName)
+    for i in 1...10 {
+      let newEntry = ListEntry(name: "Item \(i)", rank: i)
+      newList.entries.append(newEntry)
+    }
+    context.insert(newList)
+    newListName = ""
+  }
+  
+  private func deleteItems(offsets: IndexSet)
+  {
+    withAnimation
+    {
+      for index in offsets
+      {
+        let item = list[index]
+        context.delete(item)
+      }
+    }
+  }
+  
 }
 
 #Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+  ContentView()
+    .modelContainer(for: [ListItem.self, ListEntry.self], inMemory: true)
 }
