@@ -18,63 +18,75 @@ struct ContentView: View
   
   var body: some View
   {
-    VStack
-    {
-      Text("Top 10 Lists")
-        .font(.title)
-        .padding(10)
-        .background(Color.teal.opacity(1))
-        .foregroundColor(.black)
-        .cornerRadius(10)
-        .shadow(radius: 6)
-      
-      NavigationStack
-      {
-        List
-        {
-          ForEach(list) { item in
-            NavigationLink(destination: ListDetail(listItem: item)) {
-              Text(item.name)
+    ZStack {
+      VStack(spacing: 20) {
+        // Custom title
+        Image("comic shape")
+            .resizable()
+            .frame(width: 300, height: 175
+            )
+            .aspectRatio(contentMode: .fit)
+        
+        NavigationStack {
+          List {
+            ForEach(list) { item in
+              NavigationLink(destination: ListDetail(listItem: item)) {
+                ComicListRow(item: item)
+              }
             }
+            .onDelete(perform: deleteItems)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
           }
-          .onDelete(perform: deleteItems)
-        }
-        .toolbar {
-          ToolbarItem(placement: .automatic)
-            {
+          .listStyle(PlainListStyle())
+          .toolbar {
+            ToolbarItemGroup(placement: .bottomBar) {
               TextField("Enter New List", text: $newListName)
                 .textFieldStyle(.roundedBorder)
-                .padding(.vertical, 4)
-            }
-          ToolbarItem(placement: .navigationBarTrailing) {
-            EditButton()
-          }
-          ToolbarItem {
-            Button(action: addList) {
-              Label("Add Item", systemImage: "plus")
+              
+              Button(action: addList){
+                HStack(alignment: .center) {
+                  Image(systemName: "plus")
+                    .foregroundColor(.white)
+                  Text("Add")
+                }
+              }
+              .buttonStyle(ComicButtonStyle())
+              .padding(3)
+
+              EditButton()
+                .foregroundColor(.white)
+                .background(
+                  RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.blue)
+                    .shadow(color: .black.opacity(0.3), radius: 1.5, x: 1.5, y: 1.5)
+                )
             }
           }
         }
       }
     }
-    
   }
   
   
+  // Adding a list using Swift Data to save it
   private func addList()
   {
-    let newList = ListItem(name: newListName)
-    for i in 1...10 {
-      let newEntry = ListEntry(name: "Item \(i)", rank: i)
-      newList.entries.append(newEntry)
+    withAnimation(Animation.easeIn)
+    {
+      let newList = ListItem(name: newListName)
+      for i in 1...10 {
+        let newEntry = ListEntry(name: "Item \(i)", rank: i)
+        newList.entries.append(newEntry)
+      }
+      context.insert(newList)
+      newListName = ""
     }
-    context.insert(newList)
-    newListName = ""
   }
-  
+  // Delete Items in the list using Swift Data
   private func deleteItems(offsets: IndexSet)
   {
-    withAnimation
+    withAnimation(Animation.easeOut)
     {
       for index in offsets
       {
