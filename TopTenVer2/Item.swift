@@ -47,9 +47,28 @@ struct ListDetail: View {
       List() {
         ForEach(sortedEntries) { entry in
           HStack {
-            Text("\(entry.rank)")
-              .frame(width: 30, alignment: .leading)
-              .fontWeight(.bold)
+            switch entry.rank {
+            case 1:
+              HStack {
+                Image(systemName: "star.fill")
+                  .foregroundStyle(.yellow)
+                Text("1.")
+              }
+            case 2:
+              HStack {
+                Image(systemName: "star.fill")
+                  .foregroundStyle(.gray)
+                Text("2.")
+              }
+            case 3:
+              HStack {
+                Image(systemName: "star.fill")
+                  .foregroundStyle(.brown)
+                Text("3.")
+              }
+            default:
+              Text("\(entry.rank).")
+            }
             TextField("Entry", text: Binding(get: {
               entry.name
             }, set: { newValue in
@@ -61,7 +80,6 @@ struct ListDetail: View {
         }
         .onMove(perform: moveEntries)
       }
-      .navigationTitle("Edit \(listItem.name)")
       .toolbar {
         EditButton()
       }
